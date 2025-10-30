@@ -1,7 +1,6 @@
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> 9b56f8f9a909ea5c2cd8821b0454e1c1cfb8aecf
+
+IMPORTANTE: Es necesario descargar a parte los microdatos de la EPF y colocarlos en la carpeta correspondiente, pues pesan demasiado para poder subirlos a github.
+
 # GUÍA DEL SCRIPT PARA CONSTRUIR UN IPC DE INQUILINOS
 
 ## 0. Materiales y preparaciones previas
@@ -63,10 +62,8 @@ Por último, graficamos los resultados y los guardamos en la carpeta de graficos
 ## 7. Comparar salarios
 
 Se comparan salarios deflactados con el IPC oficial con salarios deflactados con el IPC de inquilinos para cada CCAA. El grafico se guarda en la carperta de gráficos.
-<<<<<<< HEAD
+
 =======
 =======
-Las instrucciones para correr los scripts y organizar los datos están en el archivo de .word "Instrucciones y metodología calculo IPC inquilinos Miguel"
+
 IMPORTANTE: Como indica en el documento de instrucciones, es necesario descargar a parte los microdatos de la EPF y colocarlos en la carpeta correspondiente, pues pesan demasiado para poder subirlos a github.
->>>>>>> 1e28baf94d03a69f015ffc9d50c08c9168d8abaa
->>>>>>> 9b56f8f9a909ea5c2cd8821b0454e1c1cfb8aecf
