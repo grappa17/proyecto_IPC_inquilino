@@ -87,39 +87,38 @@ df_completo <- df_hogares %>%
 df_completo <- df_completo %>% 
   mutate(GASTO_SIN_IMP = GASTOT - coalesce(GASTNOM4, 0)) # Tomo los valores de GASTNOM4 como "0" antes de la opetación
 
-df_completo <- df_completo %>% 
-  mutate(
-    PESO_ALQ = GASTO_ALQUILER / GASTO_SIN_IMP
-  )
-
-
 peso_alquiler_anual <- df_completo %>%
-  filter(!is.na(PESO_ALQ) & PESO_ALQ >= 0) %>%  # Eliminar NAs y valores negativos
+  filter(!is.na(GASTO_ALQUILER) & !is.na(GASTO_SIN_IMP) &
+           GASTO_ALQUILER >= 0 & GASTO_SIN_IMP > 0) %>%
   group_by(ANOENC) %>%
   summarise(
     n_observaciones = n(),
-    peso_alquiler_medio = weighted.mean(PESO_ALQ, FACTOR, na.rm = TRUE),
-    peso_total_ponderado = sum(PESO_ALQ * FACTOR, na.rm = TRUE),
-    suma_factores = sum(FACTOR, na.rm = TRUE)
+    # Ratio de totales: gasto agregado en alquiler / gasto agregado total
+    gasto_total_alquiler_ponderado = sum(GASTO_ALQUILER * FACTOR, na.rm = TRUE),
+    gasto_total_sin_imp_ponderado = sum(GASTO_SIN_IMP * FACTOR, na.rm = TRUE),
+    peso_alquiler_medio = gasto_total_alquiler_ponderado / gasto_total_sin_imp_ponderado
   ) %>%
   mutate(
-    peso_alquiler_medio = round(peso_alquiler_medio, 3),
+    peso_alquiler_medio = round(peso_alquiler_medio, 5),
   ) %>%
   arrange(ANOENC)
 
 
 ###################### Repetir con CCAA ########
 peso_alquiler_anual_ccaa <- df_completo %>%
-  filter(!is.na(PESO_ALQ) & PESO_ALQ >= 0) %>%  # Eliminar NAs y valores negativos
+  filter(!is.na(GASTO_ALQUILER) & !is.na(GASTO_SIN_IMP) &
+           GASTO_ALQUILER >= 0 & GASTO_SIN_IMP > 0) %>%
   group_by(ANOENC, CCAA) %>%
   summarise(
     n_observaciones = n(),
-    peso_alquiler_medio = weighted.mean(PESO_ALQ, FACTOR, na.rm = TRUE),
-    peso_total_ponderado = sum(PESO_ALQ * FACTOR, na.rm = TRUE),
-    suma_factores = sum(FACTOR, na.rm = TRUE)
+    # Ratio de totales por CCAA
+    gasto_total_alquiler_ponderado = sum(GASTO_ALQUILER * FACTOR, na.rm = TRUE),
+    gasto_total_sin_imp_ponderado = sum(GASTO_SIN_IMP * FACTOR, na.rm = TRUE),
+    peso_alquiler_medio = gasto_total_alquiler_ponderado / gasto_total_sin_imp_ponderado,
+    .groups = 'drop'
   ) %>%
   mutate(
-    peso_alquiler_medio = round(peso_alquiler_medio, 3),
+    peso_alquiler_medio = round(peso_alquiler_medio, 5)
   ) %>%
   arrange(CCAA, ANOENC)
 
@@ -156,7 +155,7 @@ peso_alquiler_anual_ccaa <- peso_alquiler_anual_ccaa %>% # Union de columnas
 
 # Alquiler estatal
 peso_alquiler_anual <- peso_alquiler_anual %>%
-  select(-n_observaciones, -peso_total_ponderado, -suma_factores) %>%
+  select(-n_observaciones, -gasto_total_alquiler_ponderado, -gasto_total_sin_imp_ponderado) %>%
   mutate(AÑO_PONDERACION = ANOENC + 1)  %>%
   rename(AÑO_DATOS = ANOENC,
          ESFUERZO = peso_alquiler_medio)
@@ -168,7 +167,7 @@ write_xlsx(peso_alquiler_anual,
 
 # Alquiler CCAA
 peso_alquiler_anual_ccaa <- peso_alquiler_anual_ccaa %>%
-  select(-n_observaciones, -peso_total_ponderado, -suma_factores) %>%
+  select(-n_observaciones, -gasto_total_alquiler_ponderado, -gasto_total_sin_imp_ponderado) %>%
   mutate(AÑO_PONDERACION = ANOENC + 1)  %>%
   rename(AÑO_DATOS = ANOENC,
          ESFUERZO = peso_alquiler_medio)
