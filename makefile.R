@@ -19,12 +19,12 @@ scripts <- c(
 )
 
 # Ejecutar todos los scripts
-cat("Iniciando ejecución de scripts...\n\n")
+cat("Iniciando ejecución de scripts...")
 
 for (script in scripts) {
-  cat("Ejecutando:", script, "\n")
-  source(script, encoding = "UTF-8")
-  cat("✓ Completado\n\n")
+  cat("Ejecutando:", script)
+  source(script)
+  cat(" Completado")
 }
 
-cat("¡Todos los scripts ejecutados!\n")
+cat("¡Todos los scripts ejecutados!")

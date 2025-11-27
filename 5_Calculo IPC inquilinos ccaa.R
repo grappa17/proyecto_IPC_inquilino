@@ -343,10 +343,10 @@ indice_check_full <- indice_encadenado_ccaa %>%
       # Primer punto de cada CCAA: NA
       row_number() == 1 ~ NA_real_,
       
-      # Si es enero → usar diciembre del año anterior
+      # Si es enero  usar diciembre del año anterior
       mes == 1 ~ valor * lag(valor_encadenado) / 100,
       
-      # Si no es enero → usar el mes anterior
+      # Si no es enero  usar el mes anterior
       TRUE ~ lag(valor_encadenado) * (valor / lag(valor))
     ),
     

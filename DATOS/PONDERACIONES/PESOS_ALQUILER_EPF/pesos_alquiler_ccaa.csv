@@ -1,0 +1,153 @@
+CCAA,nombre,AÑO_DATOS,AÑO_PONDERACION,ESFUERZO
+1,Andalucía,2017,2018,0.18616
+1,Andalucía,2018,2019,0.18599
+1,Andalucía,2019,2020,0.20461
+1,Andalucía,2020,2021,0.22108
+1,Andalucía,2021,2022,0.22889
+1,Andalucía,2022,2023,0.20063
+1,Andalucía,2023,2024,0.23031
+1,Andalucía,2024,2025,0.21167
+2,Aragón,2017,2018,0.22398
+2,Aragón,2018,2019,0.23698
+2,Aragón,2019,2020,0.21439
+2,Aragón,2020,2021,0.2627
+2,Aragón,2021,2022,0.219
+2,Aragón,2022,2023,0.24329
+2,Aragón,2023,2024,0.20393
+2,Aragón,2024,2025,0.20787
+3,"Asturias, Principado de",2017,2018,0.20283
+3,"Asturias, Principado de",2018,2019,0.18659
+3,"Asturias, Principado de",2019,2020,0.20847
+3,"Asturias, Principado de",2020,2021,0.26376
+3,"Asturias, Principado de",2021,2022,0.27376
+3,"Asturias, Principado de",2022,2023,0.2089
+3,"Asturias, Principado de",2023,2024,0.2043
+3,"Asturias, Principado de",2024,2025,0.20828
+4,"Balears, Illes",2017,2018,0.20405
+4,"Balears, Illes",2018,2019,0.24447
+4,"Balears, Illes",2019,2020,0.27593
+4,"Balears, Illes",2020,2021,0.34555
+4,"Balears, Illes",2021,2022,0.3127
+4,"Balears, Illes",2022,2023,0.27338
+4,"Balears, Illes",2023,2024,0.26192
+4,"Balears, Illes",2024,2025,0.28826
+5,Canarias,2017,2018,0.22127
+5,Canarias,2018,2019,0.21426
+5,Canarias,2019,2020,0.26167
+5,Canarias,2020,2021,0.31332
+5,Canarias,2021,2022,0.28524
+5,Canarias,2022,2023,0.24511
+5,Canarias,2023,2024,0.20692
+5,Canarias,2024,2025,0.21628
+6,Cantabria,2017,2018,0.22478
+6,Cantabria,2018,2019,0.26344
+6,Cantabria,2019,2020,0.23459
+6,Cantabria,2020,2021,0.3267
+6,Cantabria,2021,2022,0.28926
+6,Cantabria,2022,2023,0.26061
+6,Cantabria,2023,2024,0.27042
+6,Cantabria,2024,2025,0.22961
+7,Castilla y León,2017,2018,0.1884
+7,Castilla y León,2018,2019,0.17757
+7,Castilla y León,2019,2020,0.2331
+7,Castilla y León,2020,2021,0.23172
+7,Castilla y León,2021,2022,0.24164
+7,Castilla y León,2022,2023,0.19157
+7,Castilla y León,2023,2024,0.22639
+7,Castilla y León,2024,2025,0.17455
+8,Castilla-La Mancha,2017,2018,0.18802
+8,Castilla-La Mancha,2018,2019,0.21972
+8,Castilla-La Mancha,2019,2020,0.20033
+8,Castilla-La Mancha,2020,2021,0.26
+8,Castilla-La Mancha,2021,2022,0.21013
+8,Castilla-La Mancha,2022,2023,0.25068
+8,Castilla-La Mancha,2023,2024,0.21477
+8,Castilla-La Mancha,2024,2025,0.22451
+9,Cataluña,2017,2018,0.25012
+9,Cataluña,2018,2019,0.24327
+9,Cataluña,2019,2020,0.24589
+9,Cataluña,2020,2021,0.30311
+9,Cataluña,2021,2022,0.2919
+9,Cataluña,2022,2023,0.28324
+9,Cataluña,2023,2024,0.3042
+9,Cataluña,2024,2025,0.25898
+10,Comunitat Valenciana,2017,2018,0.19685
+10,Comunitat Valenciana,2018,2019,0.20264
+10,Comunitat Valenciana,2019,2020,0.19472
+10,Comunitat Valenciana,2020,2021,0.2491
+10,Comunitat Valenciana,2021,2022,0.25858
+10,Comunitat Valenciana,2022,2023,0.24201
+10,Comunitat Valenciana,2023,2024,0.22153
+10,Comunitat Valenciana,2024,2025,0.22214
+11,Extremadura,2017,2018,0.14885
+11,Extremadura,2018,2019,0.15075
+11,Extremadura,2019,2020,0.1707
+11,Extremadura,2020,2021,0.20759
+11,Extremadura,2021,2022,0.13324
+11,Extremadura,2022,2023,0.14612
+11,Extremadura,2023,2024,0.23042
+11,Extremadura,2024,2025,0.17023
+12,Galicia,2017,2018,0.19521
+12,Galicia,2018,2019,0.20742
+12,Galicia,2019,2020,0.21076
+12,Galicia,2020,2021,0.22225
+12,Galicia,2021,2022,0.22499
+12,Galicia,2022,2023,0.1963
+12,Galicia,2023,2024,0.19727
+12,Galicia,2024,2025,0.16787
+13,"Madrid, Comunidad de",2017,2018,0.24554
+13,"Madrid, Comunidad de",2018,2019,0.23881
+13,"Madrid, Comunidad de",2019,2020,0.24886
+13,"Madrid, Comunidad de",2020,2021,0.3092
+13,"Madrid, Comunidad de",2021,2022,0.30767
+13,"Madrid, Comunidad de",2022,2023,0.28096
+13,"Madrid, Comunidad de",2023,2024,0.28408
+13,"Madrid, Comunidad de",2024,2025,0.25704
+14,"Murcia, Región de",2017,2018,0.18735
+14,"Murcia, Región de",2018,2019,0.19969
+14,"Murcia, Región de",2019,2020,0.20276
+14,"Murcia, Región de",2020,2021,0.2516
+14,"Murcia, Región de",2021,2022,0.2161
+14,"Murcia, Región de",2022,2023,0.1863
+14,"Murcia, Región de",2023,2024,0.22096
+14,"Murcia, Región de",2024,2025,0.17663
+15,"Navarra, Comunidad Foral de",2017,2018,0.20913
+15,"Navarra, Comunidad Foral de",2018,2019,0.19679
+15,"Navarra, Comunidad Foral de",2019,2020,0.18693
+15,"Navarra, Comunidad Foral de",2020,2021,0.23062
+15,"Navarra, Comunidad Foral de",2021,2022,0.22051
+15,"Navarra, Comunidad Foral de",2022,2023,0.20971
+15,"Navarra, Comunidad Foral de",2023,2024,0.21746
+15,"Navarra, Comunidad Foral de",2024,2025,0.23508
+16,País Vasco,2017,2018,0.26486
+16,País Vasco,2018,2019,0.25916
+16,País Vasco,2019,2020,0.28922
+16,País Vasco,2020,2021,0.30675
+16,País Vasco,2021,2022,0.3
+16,País Vasco,2022,2023,0.27447
+16,País Vasco,2023,2024,0.28897
+16,País Vasco,2024,2025,0.30333
+17,"Rioja, La",2017,2018,0.1849
+17,"Rioja, La",2018,2019,0.19406
+17,"Rioja, La",2019,2020,0.19752
+17,"Rioja, La",2020,2021,0.22071
+17,"Rioja, La",2021,2022,0.21285
+17,"Rioja, La",2022,2023,0.16038
+17,"Rioja, La",2023,2024,0.17007
+17,"Rioja, La",2024,2025,0.18371
+18,Ceuta,2017,2018,0.12473
+18,Ceuta,2018,2019,0.27134
+18,Ceuta,2019,2020,0.14648
+18,Ceuta,2020,2021,0.29473
+18,Ceuta,2021,2022,0.10773
+18,Ceuta,2022,2023,0.22918
+18,Ceuta,2023,2024,0.14573
+18,Ceuta,2024,2025,0.23118
+19,Melilla,2017,2018,0.15788
+19,Melilla,2018,2019,0.10065
+19,Melilla,2019,2020,0.14439
+19,Melilla,2020,2021,0.0997
+19,Melilla,2021,2022,0.1573
+19,Melilla,2022,2023,0.19403
+19,Melilla,2023,2024,0.18761
+19,Melilla,2024,2025,0.20066

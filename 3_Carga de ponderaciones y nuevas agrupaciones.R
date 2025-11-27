@@ -19,7 +19,6 @@ library(writexl)
 # AÑOS A OBTENER (SOLO TOCAR ESTO)
 anios <- 2019:2025
 
-
 anios_ponderaciones <- (min(anios) - 2):(max(anios) - 1) # Para los años que quiero obtener, necesito años previos de ponderaciones
 anios_ponderaciones_IPC <- (min(anios) - 1):(max(anios)) # Para los años que quiero obtener, necesito años previos de ponderaciones
 
@@ -220,9 +219,9 @@ sumas_correctas <- df_ponderaciones_CCAA %>%
   all(. > 999.9 & . < 1000.1)  # Tolerancia de ±0.1
 
 if (sumas_correctas) {
-  message("✓ Todas las sumas son aproximadamente 1000")
+  message(" Todas las sumas son aproximadamente 1000")
 } else {
-  message("⚠ Algunas sumas no son 1000 - Revisar:")
+  message(" Algunas sumas no son 1000 - Revisar:")
   # Mostrar grupos problemáticos
   df_ponderaciones_CCAA  %>%
     group_by(anio, CCAA) %>%
@@ -265,9 +264,9 @@ sumas_correctas <- df_ponderaciones_CCAA %>%
   all(. > 999.9 & . < 1000.1)  # Tolerancia de ±0.1
 
 if (sumas_correctas) {
-  message("✓ Todas las sumas son aproximadamente 1000")
+  message(" Todas las sumas son aproximadamente 1000")
 } else {
-  message("⚠ Algunas sumas no son 1000 - Revisar:")
+  message(" Algunas sumas no son 1000 - Revisar:")
   # Mostrar grupos problemáticos
   df_ponderaciones_CCAA  %>%
     group_by(anio, CCAA) %>%
