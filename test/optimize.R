@@ -1,7 +1,6 @@
 # Reduce basefile size x 90% and sanitize NAs to 0
 
 library(data.table)
-library(survey)
 
 # Convert .tab to .csv if needed (set to true if 2023 and 2024 are missing as csv)
 for (i in 2023:2024) {
