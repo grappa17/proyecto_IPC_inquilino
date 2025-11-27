@@ -57,16 +57,13 @@ library(data.table)
 library(survey)
 
 # Convert .tab to .csv if needed (set to true if 2023 and 2024 are missing as csv)
-pending <- TRUE
-
-if (pending) {
   for (i in 2023:2024) {
     dt_gasto <- paste0("DATOS/EPF/EPFgastos_", i)
     dt_hogar <- paste0("DATOS/EPF/EPFhogar_", i)
     fwrite(fread(paste0(dt_gasto, ".tab"), sep = "\t"), paste0(dt_gasto, ".csv"))
     fwrite(fread(paste0(dt_hogar, ".tab"), sep = "\t"), paste0(dt_hogar, ".csv"))
   }
-}
+
 # Listamos los ficheros originales
 files <- list.files("DATOS/EPF/", pattern = ".csv", full.names = TRUE)
 
@@ -76,11 +73,10 @@ for (f in files) {
   dt[is.na(dt)] <- 0 # Sanitize all NAs to 0
   pre <- ifelse(f %like% "gasto", "DATOS/REDUCED/gastos_join_", "DATOS/REDUCED/hogar_join_")
   fwrite(dt,paste0(pre, dt$ANOENC[1], ".tsv.gz"), sep = "\t", compress = "gzip")
-
 }
 ```
 
-### Calculo con errores estandar y objetos de encuesta simplificadosS
+### Calculo con errores estandar y objetos de encuesta 
 
 Y aqui va una implementacion de tu script 1 incluyendo los comentarios que te hacia al principio incluidos:
 
@@ -91,15 +87,14 @@ library(survey)
 
 # globals
 ratio_alquiler <- ratio_ccaa <- list()
-keys <- c("NUMERO", "ANOENC", "FACTOR")
 years <- c(2017:2024)
 
 # iteramos por años para obtener los resultados de cada wave
 for (i in years) {
 
   # importamos nuevos ficheros optimizados
-  dt1 <- fread(paste0("DATOS/REDUCED/gastos_join_", i, ".tsv.gz"))
-  dt2 <- fread(paste0("DATOS/REDUCED/hogar_join_", i, ".tsv.gz"))
+  dt1 <- fread(paste0("test/out/gastos_join_", i, ".tsv.gz"))
+  dt2 <- fread(paste0("test/out/hogar_join_", i, ".tsv.gz"))
 
   # calculamos el gasto en alquiler por hogar
   rent_agg <- dt1[grep("^0411", CODIGO), .(GALQ = sum(GASTO, na.rm = TRUE)), by = "NUMERO"]
@@ -126,6 +121,6 @@ for (i in years) {
 }
 
 # exportamos los resultados tras normalizarlos con rbindlist & rbind 
-rbindlist(ratio_ccaa, idcol = "ANOENC")[, PORCENTAJE_ALQUILER := GALQ / GASTMON] %>% fwrite("ratio_ccaa.csv")
-data.table(year = names(ratio_alquiler), ratio = unlist(ratio_alquiler)) %>% fwrite("ratio_alquiler.csv")
+rbindlist(ratio_ccaa, idcol = "ANOENC")[, PORCENTAJE_ALQUILER := GALQ / GASTMON] %>% fwrite("test/out/ratio_ccaa.csv")
+data.table(year = names(ratio_alquiler), ratio = unlist(ratio_alquiler)) %>% fwrite("test/out/ratio_alquiler.csv")
 ```
