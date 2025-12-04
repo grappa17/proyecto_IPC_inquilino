@@ -41,7 +41,7 @@ if (!dir.exists(ruta_nuevos_pesos_alquiler)) {
 ####################### Carga de datos y preparacion de dfs ####
 # Definir todas las columnas que quiero utilizar, incluyendo las variantes flag
 columnas_hogares <- c('ANOENC', 'NUMERO', 'CCAA', 'NUTS1', 'FACTOR', 'REGTEN',
-                      'GASTOT', 'GASTNOM4')
+                      'GASTOT', 'GASTNOM4', 'GASTMON')
 
 columnas_gastos <- c('ANOENC', 'NUMERO', 'CODIGO', 'GASTO', 'FACTOR')
 
@@ -85,7 +85,7 @@ df_completo <- df_hogares %>%
 ###################### Calculo #####
 
 df_completo <- df_completo %>% 
-  mutate(GASTO_SIN_IMP = GASTOT) # Tomo solo el gasto monetario, que no incluye alquiler imputado ni autoconsumo
+  mutate(GASTO_SIN_IMP = GASTMON) # Tomo solo el gasto monetario, que no incluye alquiler imputado ni autoconsumo
 
 peso_alquiler_anual <- df_completo %>%
   filter(!is.na(GASTO_ALQUILER) & !is.na(GASTO_SIN_IMP) &
