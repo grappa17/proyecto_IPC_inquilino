@@ -49,8 +49,8 @@ if (!dir.exists(ruta_ponderaciones_nuevas_CCAA)) {
 ####### REPONDERAR SUBGRUPOS IPC ESTATAL #######
 
 # Cargo los datos de peso del alquiler del anterior script
-nuevo_peso_alquiler <- read_xlsx(
-  file.path(ruta_nuevos_pesos_alquiler, "pesos_alquiler_estatal.xlsx")
+nuevo_peso_alquiler <- fread(
+  file.path(ruta_nuevos_pesos_alquiler, "pesos_alquiler_estatal.csv")
 )
 
 # Funcion para reponderar
@@ -156,8 +156,8 @@ for (archivo in archivos_originales) {
 ###################### Repetir procesos para CCAA #####
 
 # Funcion para reponderar
-peso_alquiler_ccaa <- read_xlsx(
-  file.path(ruta_nuevos_pesos_alquiler, "pesos_alquiler_ccaa.xlsx"))
+peso_alquiler_ccaa <- fread(
+  file.path(ruta_nuevos_pesos_alquiler, "pesos_alquiler_ccaa.csv"))
 
 
 # Función para reponderar por cada CCAA con pesos específicos por CCAA
