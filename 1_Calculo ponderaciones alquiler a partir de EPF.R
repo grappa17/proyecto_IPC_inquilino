@@ -80,12 +80,12 @@ df_gastos <- df_gastos %>%
 # Uno dfs
 df_completo <- df_hogares %>%
   left_join(df_gastos, by = c("ANOENC", "NUMERO")) %>%
-  filter(REGTEN == 3 | REGTEN == 4)
+  filter(REGTEN == 3)
 
 ###################### Calculo #####
 
 df_completo <- df_completo %>% 
-  mutate(GASTO_SIN_IMP = GASTOT - coalesce(GASTNOM4, 0)) # Tomo los valores de GASTNOM4 como "0" antes de la opetación
+  mutate(GASTO_SIN_IMP = GASTOT) # Tomo solo el gasto monetario, que no incluye alquiler imputado ni autoconsumo
 
 peso_alquiler_anual <- df_completo %>%
   filter(!is.na(GASTO_ALQUILER) & !is.na(GASTO_SIN_IMP) &
