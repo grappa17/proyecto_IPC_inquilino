@@ -6,6 +6,12 @@
               ## CARGA DE PONDERACIONES Y MODIFICACIÓN DE GRUPOS PARA UNIFICAR CON IPC ##
 
 
+# En este script, se cargan los datos de las ponderaciones para terminar de prepararlos. Dado que a lo largo de los años analizados
+# cambian ligeramente las agrupaciones de subgrupos, es necesario uniformarlas todas y hacer que coincidan con los subgrupos del IPC 
+# tal y como los proporciona actualmente el INE. En concreto, en los años en los que aparecen, "081 Servicios postales" lo uno a "083 Servicios de telefonía y fax", 
+# y "092 Otros grandes bienes duraderos para ocio y cultura", lo sumo a "093 Otros artículos y equipos para ocio, jardinería y animales domésticos". Hago comprobaciones al final
+# para comprobar que todo suma 1000. Guardo de nuevo las ponderaciones con el "apellido" de "definitivas".
+
 
 # CARGA LIBRERIAS
 library(readxl)
@@ -103,7 +109,7 @@ df_ponderaciones_unificado <- df_ponderaciones_unificado %>%
              . + replace_na(.[Componente == "092 Otros grandes bienes duraderos para ocio y cultura"], 0), # Al valor de la columna actual se le suma el valor en la misma columna de la observacion "092..."
              .) # Si no, se mantiene igual
   )) %>%
-  # Filtrar para eliminar la fila 081
+  # Filtrar para eliminar la fila 092
   filter(Componente != "092 Otros grandes bienes duraderos para ocio y cultura") %>%
   # Reordenar las filas si es necesario
   arrange(Componente)

@@ -51,7 +51,15 @@ ipc_filtrado <- ipc_original %>%
 
 
 
+
 ###################### Desencadenar IPC Original #####
+
+# Lo primero que hay que hacer es desencadenarlos, dado que el INE los proporciona siguiendo la metodologia de Laspeyres encadenado. 
+# Una vez desencadenados, es posible trabajar con los valores de los componentes.
+
+# Para desencadenarlos, el valor de cada componente / subgrupo del año N se divide por el de diciembre del año N-1, y se multiplica por 100.
+
+
 ipc_desencadenado <- ipc_filtrado %>%
 # Convertir a formato largo para facilitar operaciones
 pivot_longer(
@@ -91,21 +99,29 @@ ipc_desencadenado <- ipc_desencadenado %>%
 
 
 ###################### Unir valores alquiler ######
-# Uso los datos de idealista, a sabiendas de las limitaciones que tienen.
-# Previamente los he convertido a numeros indice con base 100 en referencia a diciembre del año anteior, igual que los datos desencadenados del IPC
+# Uso los datos de idealista, a sabiendas de las limitaciones que tienen. Idealista tiende a sobreestimar los incrementos de precios al reflejar solo los precios de las viviendas que están en el mercado.
+# Pero por el momento, la unica alternativa que proporciona datos mensuales (ademas de otros portales inmobiliarios), son los propios datos del IPC de alquileres, 
+# que parecen tener el efecto contrario. Cuando se comparan los datos de precios del alquiler del IPC con otros indicadores 
+# especificos (como el IPVA, que desgraciadamente solo es anual), los aumentos que refleja el IPC son sustancialmente mas bajos.
 
+# Previamente he convertido los datos de Idealista a numeros indice con base 100 en referencia a diciembre del año anterior, replicando el formato de los datos desencadenados del IPC.
+
+# Cargo datos idealista
 df_vivienda_idealista <- read_xlsx(
   path = file.path(ruta_precios_alquiler, "Precio_alquiler_estatal_desencadenado.xlsx"),
   col_names = TRUE)
 
+# Borro dato de alquiler de los datos de IPC originales y uno los datos de idealista
 ipc_desencadenado <- ipc_desencadenado %>%
   filter(Componente != "041 Alquiler de vivienda") %>% # Borro datos originales del INE
 bind_rows(df_vivienda_idealista) # Uno datos de idealista
 
 
 
+###################### Recalcular el indice desencadenado ######
+# Una vez esta todo listo, los precios se recalculan con las nuevas ponderaciones. Para ello, cada valor desencadenado 
+# se multiplica por su ponderacion.
 
-###################### Reponderar indice desencadenado ######
 
 # Cargo de nuevo las ponderaciones
 ponderaciones_largo <- readRDS(
@@ -122,6 +138,8 @@ ipc_reponderado <- ipc_reponderado %>%
   ungroup() %>%
   filter(Componente != "Índice general") # Elimino las observaciones de indice general que no son utiles
 
+# Una vez calculados los componentes, se calcula el indice general sumando el valor de todos los componentes y dividiendolo por 1000.
+
 # Calculo el nuevo índice
 indice_general <- ipc_reponderado %>%
   group_by(anio, mes) %>%
@@ -134,6 +152,20 @@ indice_general <- ipc_reponderado %>%
 
 
 ###################### Encadenamiento del nuevo indice #####
+
+# Por ultimo, se vuelve a encadenar el índice general, para tenerlo en el mismo formato que el oficial. 
+# En este caso utilizamos una base enero 2021 = 100. 
+
+# Para volver a encadenar, el procedimiento es el siguiente: se establece el mes y año base. Para los meses posteriores, se distingue
+# entre si es enero y si no es. Si es, se calcula el coficiente de variacion dividiendo entre 100 (porque el mes anterior actua como base), y si 
+# no es enero, se divide entre el mes anterior. 
+
+# Para los meses anteriores, se distingue entre si es diciembre, se divide el mes posterior (enero) entre 100 para obtener el cofieicente de variacion.
+# Si no es diciembre, se divide el mes posterior entre el mes presente. 
+
+# A partir del coeficiente de variacion, se encadena el indice desde el punto base.
+
+
 
 # Establecer punto base: enero 2021 = 100
 indice_encadenado <- indice_general %>%
@@ -169,7 +201,7 @@ if (length(punto_base) > 0) {
     # Lo mismo pero al revés
     for (i in (punto_base - 1):1) {
       if (indice_encadenado$mes[i + 1] == 1) {
-        # El siguiente es enero
+        # Si es diciembre (el siguiente es enero)
         factor_variacion <- indice_encadenado$valor[i + 1] / 100
         indice_encadenado$valor_encadenado[i] <- indice_encadenado$valor_encadenado[i + 1] / factor_variacion
       } else {

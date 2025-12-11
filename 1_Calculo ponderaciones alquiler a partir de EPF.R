@@ -5,6 +5,7 @@
                     ## CALCULO DE PONDERACION DEL ALQUILER A PARTIR DE LOS MICRODATOS DE LA EPF ##
                     ## CALCULO DE PONDERACION DEL ALQUILER A PARTIR DE LOS MICRODATOS DE LA EPF ##
 
+# Cargo librerias
 library(magrittr)
 library(data.table)
 library(survey)
@@ -29,7 +30,20 @@ if (!dir.exists(ruta_nuevos_pesos_alquiler)) {
   dir.create(ruta_nuevos_pesos_alquiler, recursive = TRUE)
 }
 
-# CARGA DATOS
+# CARGA MICRODATOS DE LA ENCUESTA DE PRESUPUESTOS FAMILIARES Y CALCULO PONDERACION
+# La EPF es la base para construir las ponderaciones de los grupos del IPC. Para las ponderaciones del año N,
+# el INE utiliza los datos de la EPF del año N-2, pero actualizados con informacion del año N-1. Como yo no dispongo de esa 
+# informacion, utilizo directamente los microdatos del año N-1.
+
+# La ponderacion se calcula como la proporcion del gasto en alquiler (GALQ) sobre el total del gasto monetario de los hogares (GASTMON).
+
+# Utilizamos el gasto monetario y no el gasto total, porque el IPC se centra en el gasto en consumo de los hogares y sus miembros, 
+# entendido este como flujo monetario orientado al pago de bienes y servicios. Como indican en la metodologia (2016, p.7), excluyen
+# los bienes y servicios en especie.
+
+# Por ultimo, calculamos la ponderacion como cociente del gasto agregado de todos los hogares, y no como media del cociente de cada hogar, siguiendo
+# tambien la metodología del INE para la elaboracion del IPC.
+
 # iteramos por años para obtener los resultados de cada wave
 for (i in years) {
   
@@ -64,7 +78,8 @@ for (i in years) {
 
 # GUARDAR RESULTADOS
 
-# Asignamos los resultados a objetos para visualizar en RStudio
+# Asignamos los resultados a objetos para visualizar en RStudio.
+# Elevo en +1 el año de la ponderacion para luego utilizarlo con los datos correspondientes.
 resultado_ratio_alquiler <- data.table(year = names(ratio_alquiler), ratio = unlist(ratio_alquiler))
 resultado_ratio_alquiler <- resultado_ratio_alquiler %>%
   rename(AÑO_DATOS = year,
