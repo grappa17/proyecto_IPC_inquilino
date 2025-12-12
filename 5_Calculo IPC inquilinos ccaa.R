@@ -6,6 +6,7 @@
                       ## CALCULO DEL NUEVO IPC CON LAS NUEVAS PONDERACIONES (CCAA) ##
 
 
+# Ahora se replica el proceso anterior pero con los datos de CCAAs.
 
 # CARGA LIBRERIAS
 library(readxl)

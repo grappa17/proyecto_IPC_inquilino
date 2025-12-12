@@ -5,30 +5,24 @@
                     ## CALCULO DE PONDERACION DEL ALQUILER A PARTIR DE LOS MICRODATOS DE LA EPF ##
                     ## CALCULO DE PONDERACION DEL ALQUILER A PARTIR DE LOS MICRODATOS DE LA EPF ##
 
-# CARGA LIBRERIAS
-library(readxl)
-library(dplyr)
-library(tidyr)
-library(stringr)
-library(ggplot2)
+# Cargo librerias
+library(magrittr)
 library(data.table)
-library(writexl)
+library(survey)
+library(dplyr)
 
-# AÑOS A OBTENER (SOLO TOCAR ESTO)
+# globals
+ratio_alquiler <- ratio_ccaa <- list()
+
 anios <- 2019:2025
-
-
-anios_ponderaciones <- (min(anios) - 2):(max(anios) - 1) # Para los años que quiero obtener, necesito años previos de ponderaciones
-anios_ponderaciones_IPC <- (min(anios) - 1):(max(anios)) # Para los años que quiero obtener, necesito años previos de ponderaciones
-
-
+years <- (min(anios) - 2):(max(anios) - 1)
 
 # DIRECTORIO
 # Directorio base
 base_dir <- getwd()
 
 # Resto rutas
-ruta <- file.path(base_dir, "DATOS/EPF")
+ruta_datos_epf_actualizados <- file.path(base_dir, "DATOS/EPF_NUEVO")
 ruta_nuevos_pesos_alquiler <- file.path(base_dir, "DATOS/PONDERACIONES/PESOS_ALQUILER_EPF")
 
 # Crear carpeta si no existe (en las que se guardarán los nuevos pesos del alquiler)
@@ -36,91 +30,67 @@ if (!dir.exists(ruta_nuevos_pesos_alquiler)) {
   dir.create(ruta_nuevos_pesos_alquiler, recursive = TRUE)
 }
 
+# CARGA MICRODATOS DE LA ENCUESTA DE PRESUPUESTOS FAMILIARES Y CALCULO PONDERACION
+# La EPF es la base para construir las ponderaciones de los grupos del IPC. Para las ponderaciones del año N,
+# el INE utiliza los datos de la EPF del año N-2, pero actualizados con informacion del año N-1. Como yo no dispongo de esa 
+# informacion, utilizo directamente los microdatos del año N-1.
 
+# La ponderacion se calcula como la proporcion del gasto en alquiler (GALQ) sobre el total del gasto monetario de los hogares (GASTMON).
 
-####################### Carga de datos y preparacion de dfs ####
-# Definir todas las columnas que quiero utilizar, incluyendo las variantes flag
-columnas_hogares <- c('ANOENC', 'NUMERO', 'CCAA', 'NUTS1', 'FACTOR', 'REGTEN',
-                      'GASTOT', 'GASTNOM4', 'GASTMON')
+# Utilizamos el gasto monetario y no el gasto total, porque el IPC se centra en el gasto en consumo de los hogares y sus miembros, 
+# entendido este como flujo monetario orientado al pago de bienes y servicios. Como indican en la metodologia (2016, p.7), excluyen
+# los bienes y servicios en especie.
 
-columnas_gastos <- c('ANOENC', 'NUMERO', 'CODIGO', 'GASTO', 'FACTOR')
+# Por ultimo, calculamos la ponderacion como cociente del gasto agregado de todos los hogares, y no como media del cociente de cada hogar, siguiendo
+# tambien la metodología del INE para la elaboracion del IPC.
 
-cargar_datos <- function(tipo, columnas) {
-  archivos_2023 <- file.path(ruta, paste0("EPF", tipo, anios_ponderaciones, ".tab")) # defino la ruta de todos los archivos que quiero. La funcion filepath sirve para crar la ruta uniendo los distintos componentes.
-  archivos_2022 <- file.path(ruta, paste0("EPF", tipo, anios_ponderaciones, ".csv")) 
-  archivos <- c(archivos_2022, archivos_2023)
+# iteramos por años para obtener los resultados de cada wave
+for (i in years) {
   
-  dt_list <- lapply(archivos, function(archivo) {
-    # Verificar si el archivo existe antes de leerlo
-    if(file.exists(archivo)) {
-      fread(archivo, select = columnas, na.strings = c("", "NA"))
-    } else {
-      warning(paste("Archivo no encontrado:", archivo))
-      NULL
-    }
-  })
+  # importamos nuevos ficheros optimizados
+  dt1 <- fread(file.path(ruta_datos_epf_actualizados, paste0("/gastos_join_", i, ".tsv.gz")))
+  dt2 <- fread(file.path(ruta_datos_epf_actualizados, paste0("/hogar_join_", i, ".tsv.gz")))
   
-  # Filtrar elementos nulos (archivos que no existen)
-  dt_list <- dt_list[!sapply(dt_list, is.null)]
+  # CALCULO PONDERACIONES
+  # calculamos el gasto en alquiler por hogar
+  rent_agg <- dt1[grep("^0411", CODIGO), .(GALQ = sum(GASTO, na.rm = TRUE)), by = "NUMERO"]
   
-  return(rbindlist(dt_list, fill = TRUE))
+  # We use dt2 as the base because it contains the correct annual GASTMON (1 row per family)
+  dt <- merge(dt2, rent_agg, by = "NUMERO", all.x = TRUE)[is.na(GALQ), GALQ := 0]
+  
+  # definimos la encuesta y acotamos la muestra para crear objeto survey con pesos
+  sv_dt <- svydesign(id = ~1, weights = ~FACTOR, data =  subset(dt, ANOENC == i))
+  
+  # para el total simplemente syytotal
+  alquiler <- svytotal(~GALQ, subset(sv_dt, REGTEN == 3))
+  gasto <- svytotal(~GASTMON, subset(sv_dt, REGTEN == 3))
+  
+  # para poder cruzar por CCAA como segunda categoria se usa el objeto svyby
+  alquiler_ccaa <- svyby(~GALQ, ~ CCAA, subset(sv_dt, REGTEN == 3), svytotal, na.rm = TRUE)
+  gasto_ccaa <- svyby(~GASTMON, ~ CCAA, subset(sv_dt, REGTEN == 3), svytotal, na.rm = TRUE)
+  
+  # finalmente obtenemos los nuevos pesos
+  ratio_ccaa[[as.character(i)]] <- merge(alquiler_ccaa, gasto_ccaa, by = "CCAA")
+  ratio_alquiler[[as.character(i)]] <- alquiler / gasto
+  
+  rm(dt, dt1, dt2, sv_dt) # Clean up large objects to manage memory
 }
 
+# GUARDAR RESULTADOS
 
-df_hogares <- cargar_datos("hogar_", columnas_hogares) # ejecuto las funciones
-df_gastos <- cargar_datos("gastos_", columnas_gastos)
-
-# En el df de gastos filtro solo las observaciones de alquiler $CODIGO == 04110
-df_gastos <- df_gastos %>% 
-  filter(CODIGO == "04110") %>%
-  rename(GASTO_ALQUILER = GASTO) %>%
-  rename(FACTOR_ALQUILER = FACTOR) %>%
-  select(-CODIGO)
-
-# Uno dfs
-df_completo <- df_hogares %>%
-  left_join(df_gastos, by = c("ANOENC", "NUMERO")) %>%
-  filter(REGTEN == 3)
-
-###################### Calculo #####
-
-df_completo <- df_completo %>% 
-  mutate(GASTO_SIN_IMP = GASTMON) # Tomo solo el gasto monetario, que no incluye alquiler imputado ni autoconsumo
-
-peso_alquiler_anual <- df_completo %>%
-  filter(!is.na(GASTO_ALQUILER) & !is.na(GASTO_SIN_IMP) &
-           GASTO_ALQUILER >= 0 & GASTO_SIN_IMP > 0) %>%
-  group_by(ANOENC) %>%
-  summarise(
-    n_observaciones = n(),
-    # Ratio de totales: gasto agregado en alquiler / gasto agregado total
-    gasto_total_alquiler_ponderado = sum(GASTO_ALQUILER * FACTOR, na.rm = TRUE),
-    gasto_total_sin_imp_ponderado = sum(GASTO_SIN_IMP * FACTOR, na.rm = TRUE),
-    peso_alquiler_medio = gasto_total_alquiler_ponderado / gasto_total_sin_imp_ponderado
-  ) %>%
+# Asignamos los resultados a objetos para visualizar en RStudio.
+# Elevo en +1 el año de la ponderacion para luego utilizarlo con los datos correspondientes.
+resultado_ratio_alquiler <- data.table(year = names(ratio_alquiler), ratio = unlist(ratio_alquiler))
+resultado_ratio_alquiler <- resultado_ratio_alquiler %>%
+  rename(AÑO_DATOS = year,
+         ESFUERZO = ratio) %>%
   mutate(
-    peso_alquiler_medio = round(peso_alquiler_medio, 5),
-  ) %>%
-  arrange(ANOENC)
+    AÑO_DATOS = as.numeric(AÑO_DATOS),
+    AÑO_PONDERACION = AÑO_DATOS + 1
+  ) %>% fwrite(file.path(ruta_nuevos_pesos_alquiler, "pesos_alquiler_estatal.csv"))
 
 
-###################### Repetir con CCAA ########
-peso_alquiler_anual_ccaa <- df_completo %>%
-  filter(!is.na(GASTO_ALQUILER) & !is.na(GASTO_SIN_IMP) &
-           GASTO_ALQUILER >= 0 & GASTO_SIN_IMP > 0) %>%
-  group_by(ANOENC, CCAA) %>%
-  summarise(
-    n_observaciones = n(),
-    # Ratio de totales por CCAA
-    gasto_total_alquiler_ponderado = sum(GASTO_ALQUILER * FACTOR, na.rm = TRUE),
-    gasto_total_sin_imp_ponderado = sum(GASTO_SIN_IMP * FACTOR, na.rm = TRUE),
-    peso_alquiler_medio = gasto_total_alquiler_ponderado / gasto_total_sin_imp_ponderado,
-    .groups = 'drop'
-  ) %>%
-  mutate(
-    peso_alquiler_medio = round(peso_alquiler_medio, 5)
-  ) %>%
-  arrange(CCAA, ANOENC)
+resultado_ratio_ccaa <- rbindlist(ratio_ccaa, idcol = "ANOENC")[, PORCENTAJE_ALQUILER := GALQ / GASTMON]
 
 ccaa <- tribble(
   ~CCAA, ~nombre,
@@ -148,33 +118,20 @@ ccaa <- tribble(
 ccaa <- ccaa %>%
   mutate(CCAA = as.integer(CCAA)) # Paso al mismo formato para poder unir
 
-peso_alquiler_anual_ccaa <- peso_alquiler_anual_ccaa %>% # Union de columnas
-  left_join(ccaa, by = "CCAA")
-
-# Preparar datos finales del peso del alquiler y guardar
-
-# Alquiler estatal
-peso_alquiler_anual <- peso_alquiler_anual %>%
-  select(-n_observaciones, -gasto_total_alquiler_ponderado, -gasto_total_sin_imp_ponderado) %>%
-  mutate(AÑO_PONDERACION = ANOENC + 1)  %>%
+resultado_ratio_ccaa <- resultado_ratio_ccaa %>%
+  select(
+    -GALQ,
+    -se.x,
+    -se.y,
+    -GASTMON
+  ) %>%
   rename(AÑO_DATOS = ANOENC,
-         ESFUERZO = peso_alquiler_medio)
-
-write_xlsx(peso_alquiler_anual,
-           file.path(ruta_nuevos_pesos_alquiler, "pesos_alquiler_estatal.xlsx"),
-           col_names = TRUE)
-
-
-# Alquiler CCAA
-peso_alquiler_anual_ccaa <- peso_alquiler_anual_ccaa %>%
-  select(-n_observaciones, -gasto_total_alquiler_ponderado, -gasto_total_sin_imp_ponderado) %>%
-  mutate(AÑO_PONDERACION = ANOENC + 1)  %>%
-  rename(AÑO_DATOS = ANOENC,
-         ESFUERZO = peso_alquiler_medio)
-
-write_xlsx(peso_alquiler_anual_ccaa,
-           file.path(ruta_nuevos_pesos_alquiler, "pesos_alquiler_ccaa.xlsx"),
-           col_names = TRUE)
+         ESFUERZO = PORCENTAJE_ALQUILER) %>%
+  left_join(ccaa, by = "CCAA") %>%
+  mutate(
+    AÑO_DATOS = as.numeric(AÑO_DATOS),
+    AÑO_PONDERACION = AÑO_DATOS + 1
+  ) %>% fwrite(file.path(ruta_nuevos_pesos_alquiler, "pesos_alquiler_ccaa.csv"))
 
 
 

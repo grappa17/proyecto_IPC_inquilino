@@ -6,6 +6,15 @@
                 ## CALCULO DE NUEVAS PONDERACIONES DE SUBGRUPOS A PARTIR DE NUEVOS PESOS DEL ALQUILER ##
                 ## CALCULO DE NUEVAS PONDERACIONES DE SUBGRUPOS A PARTIR DE NUEVOS PESOS DEL ALQUILER ##
 
+# Tras obtener las nuevas pondearciones del alquiler de vivienda, hay que reponderar el resto de componentes de las ponderaciones de cada año
+# para que su total siga siendo 1000. Idealmente se debería utilizar para esto los datos de la EPF para cada subgrupo, pero he obtado por extraer
+# de la EPF solo la nueva ponderacion del alquiler y con eso recalcular las ponderaciones oficiales del INE. 
+
+# Para calcular las ponderaciones de los subgrupos, mantengo su peso proporcional respecto al nuevo total sin alquiler. 
+# Es decir, si antes "alimentacion" pesaba un 15% respecto al total del consumo sin alquiler, ahora lo segira haciendo, pero ese total del consumo 
+# sin alquiler previsiblemente se habra reducido. La formula es, para cada subgrupo, de cada año: (ponderacion vieja / total sin alquiler viejo) * total sin alquiler nuevo.
+
+# Para cada año se exporta un archivo nuevo de ponderaciones para los datos estatales y por CCAA.
 
 # CARGA LIBRERIAS
 library(readxl)
@@ -49,8 +58,8 @@ if (!dir.exists(ruta_ponderaciones_nuevas_CCAA)) {
 ####### REPONDERAR SUBGRUPOS IPC ESTATAL #######
 
 # Cargo los datos de peso del alquiler del anterior script
-nuevo_peso_alquiler <- read_xlsx(
-  file.path(ruta_nuevos_pesos_alquiler, "pesos_alquiler_estatal.xlsx")
+nuevo_peso_alquiler <- fread(
+  file.path(ruta_nuevos_pesos_alquiler, "pesos_alquiler_estatal.csv")
 )
 
 # Funcion para reponderar
@@ -156,8 +165,8 @@ for (archivo in archivos_originales) {
 ###################### Repetir procesos para CCAA #####
 
 # Funcion para reponderar
-peso_alquiler_ccaa <- read_xlsx(
-  file.path(ruta_nuevos_pesos_alquiler, "pesos_alquiler_ccaa.xlsx"))
+peso_alquiler_ccaa <- fread(
+  file.path(ruta_nuevos_pesos_alquiler, "pesos_alquiler_ccaa.csv"))
 
 
 # Función para reponderar por cada CCAA con pesos específicos por CCAA
