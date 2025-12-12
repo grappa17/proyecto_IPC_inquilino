@@ -141,7 +141,7 @@ grafico_salarios <- ggplot(datos_plot, aes(x = periodo, y = salario, color = tip
   geom_line(linewidth = 1) +
   facet_wrap(~ CCAA, ncol = 3, scales = "free_y") +
   scale_color_manual(
-    values = c("Oficial" = "#2E86AB", "Inquilinos" = "#A23B72"),
+    values = c("Oficial" = "#2E86AB", "Inquilinos" = "#E31A1C"),
     name = "Tipo de salario"
   ) +
   labs(
