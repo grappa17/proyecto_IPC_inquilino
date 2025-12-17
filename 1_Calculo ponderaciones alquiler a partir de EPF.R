@@ -14,7 +14,6 @@ library(dplyr)
 # globals
 ratio_alquiler <- ratio_ccaa <- list()
 
-anios <- 2019:2025
 years <- (min(anios) - 2):(max(anios) - 1)
 
 # DIRECTORIO

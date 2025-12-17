@@ -15,9 +15,7 @@ library(ggplot2)
 library(data.table)
 library(writexl)
 
-# AÑOS A OBTENER (SOLO TOCAR ESTO)
-anios <- 2019:2025
-
+# AÑOS A OBTENER
 anios_ponderaciones <- (min(anios) - 2):(max(anios) - 1) # Para los años que quiero obtener, necesito años previos de ponderaciones
 anios_ponderaciones_IPC <- (min(anios) - 1):(max(anios)) # Para los años que quiero obtener, necesito años previos de ponderaciones
 
@@ -38,35 +36,48 @@ salarios_ccaa <- read_xlsx(
   path = file.path(ruta_salarios, "coste_laboral_por_hora_efectiva_ccaa.xlsx")
 ) %>%
   pivot_longer(
-    cols = -1,  # todas las columnas excepto ...1 (CCAA)
+    cols = -1,
     names_to = "trimestre",
     values_to = "salario"
   ) %>%
   rename(CCAA = ...1) %>%
   separate(trimestre, into = c("anio", "trimestre"), sep = "T") %>%
-  filter(anio %in% anios)
-  
+  filter(anio %in% anios) %>%
+  group_by(CCAA, anio) %>%
+  summarise(
+    salario = mean(salario, na.rm = TRUE),
+    .groups = 'drop'
+  )
+
 
 deflactores <- readRDS(
   file = file.path(ruta_resultados, "ipc_inquilinos_ccaa.rds")
 ) 
 
-# Convierto los datos mensuales de IPC en datos trimestrales haciendo la media trimestral
-deflactores_trimestral <- deflactores %>%
-  mutate(trimestre = paste0(anio, "T", ceiling(mes / 3))) %>%
-  group_by(trimestre, ) %>%
+# Convierto los datos mensuales de IPC en datos anuales haciendo la media anual
+deflactores_anual <- deflactores %>%
+  group_by(anio) %>%
   summarise(
     ipc_inquilinos = mean(ipc_inquilinos, na.rm = TRUE),
     ipc_oficial = mean(ipc_oficial, na.rm = TRUE),
     .groups = 'drop'
-  ) %>%
-  separate(trimestre, into = c("anio", "trimestre"), sep = "T")
+  )
+
+# Convierto anio a numerico en ambos data frames
+salarios_ccaa <- salarios_ccaa %>%
+  mutate(anio = as.numeric(anio))
+
+deflactores_anual <- deflactores_anual %>%
+  mutate(anio = as.numeric(anio))
 
 # Uno dfs
 salarios_ccaa <- salarios_ccaa %>%
   left_join(
-    deflactores_trimestral, by = c("anio", "trimestre")
+    deflactores_anual, by = c("anio")
   )
+
+# OJO, LOS DEFLACTORES TAMBIEN TENDRIAN QUE SER DATOS POR CCAA, NO LOS GENERALES; ES UN ERROR
+
 
 # Calculo salarios reales
 salarios_ccaa <- salarios_ccaa %>%
@@ -84,24 +95,20 @@ resultados <- salarios_ccaa %>%
 
 # guardo resultados
 resultados_ancho_inquilinos <- resultados %>%
-  mutate(trimestre = paste0(anio, "T", trimestre)) %>%
   select(
-    -anio,
     -salario_real_oficial
   ) %>%
   pivot_wider(
-    names_from = trimestre,
+    names_from = anio,
     values_from = c(salario_real_inquilinos)
   )
 
 resultados_ancho_oficial <- resultados %>%
-  mutate(trimestre = paste0(anio, "T", trimestre)) %>%
   select(
-    -anio,
     -salario_real_inquilinos
   ) %>%
   pivot_wider(
-    names_from = trimestre,
+    names_from = anio,
     values_from = c(salario_real_oficial)
   )
   
@@ -119,10 +126,10 @@ write_xlsx(
 # Filtrar Total Nacional y preparar datos
 datos_plot <- resultados %>%
   filter(CCAA != "Total Nacional") %>%
-  # Crear variable temporal continua
-  mutate(
-    periodo = as.numeric(anio) + (as.numeric(trimestre) - 1) / 4
-  ) %>%
+  # # Crear variable temporal continua
+  # mutate(
+  #   periodo = as.numeric(anio) + (as.numeric(trimestre) - 1) / 4
+  # ) %>%
   # Convertir a formato largo para ggplot
   pivot_longer(
     cols = c(salario_real_oficial, salario_real_inquilinos),
@@ -137,18 +144,18 @@ datos_plot <- resultados %>%
   )
 
 # Crear gráfico con facetas
-grafico_salarios <- ggplot(datos_plot, aes(x = periodo, y = salario, color = tipo_salario, group = tipo_salario)) +
+grafico_salarios <- ggplot(datos_plot, aes(x = anio, y = salario, color = tipo_salario, group = tipo_salario)) +
   geom_line(linewidth = 1) +
   facet_wrap(~ CCAA, ncol = 3, scales = "free_y") +
   scale_color_manual(
-    values = c("Oficial" = "#2E86AB", "Inquilinos" = "#E31A1C"),
+    values = c("Oficial" = c_oficial, "Inquilinos" = c_inquilinos),
     name = "Tipo de salario"
   ) +
   labs(
     title = "Evolución del salario real por Comunidad Autónoma",
     subtitle = "Comparación entre salario oficial y salario de inquilinos (2019-2025)",
     x = "Año",
-    y = "Salario real (miles €)",
+    y = "Salario real (€ por hora)",
     caption = "Fuente: Datos propios"
   ) +
   theme_minimal() +

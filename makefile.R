@@ -1,11 +1,32 @@
-# ==============================================================================
+# ============================================================================== # 
 # SCRIPT MAESTRO - Proyecto reponderacionIPC
-# ==============================================================================
+# ============================================================================== #
 
-# Este script simplemente corre el resto de scripts
+
+# Este script ejecuta la cadena de scripts del proyecto y fija los parametros comunes
 
 # Limpiar entorno
 rm(list = ls())
+
+
+# PARAMETROS GLOBALES DEL PROYECTO
+# Seleccion de periodo base para indices
+anio_base <- 2019
+mes_base <- 1
+
+
+# Rango de años a analizar
+anios <- 2019:2025
+
+# Colores de graficos:
+c_inquilinos <- "#E31A1C"
+c_oficial <- "#1F78B4"
+
+
+
+# ============================================================================== #
+# EJECUCION DE SCRIPTS
+# ============================================================================== #
 
 # Lista de scripts
 scripts <- c(
@@ -19,12 +40,10 @@ scripts <- c(
 )
 
 # Ejecutar todos los scripts
-cat("Iniciando ejecución de scripts...")
-
+print("Iniciando ejecucion de scripts...")
 for (script in scripts) {
-  cat("Ejecutando:", script)
+  print(paste("Ejecutando:", script))
   source(script)
-  cat(" Completado")
+  print(" Completado")
 }
-
-cat("¡Todos los scripts ejecutados!")
+print("¡Todos los scripts ejecutados!")

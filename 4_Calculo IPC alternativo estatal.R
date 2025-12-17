@@ -17,14 +17,11 @@ library(ggplot2)
 library(data.table)
 library(writexl)
 
-# AÑOS A OBTENER (SOLO TOCAR ESTO)
-anios <- 2019:2025
-
-
+# AÑOS A OBTENER
 anios_ponderaciones <- (min(anios) - 2):(max(anios) - 1) # Para los años que quiero obtener, necesito años previos de ponderaciones
 anios_ponderaciones_IPC <- (min(anios) - 1):(max(anios)) # Para los años que quiero obtener, necesito años previos de ponderaciones
 
-
+  
 # DIRECTORIO
 # Directorio base
 base_dir <- getwd()
@@ -167,13 +164,13 @@ indice_general <- ipc_reponderado %>%
 
 
 
-# Establecer punto base: enero 2021 = 100
+# Establecer punto base:
 indice_encadenado <- indice_general %>%
   ungroup() %>% # garantiza que no queden agrupaciones previas de dplyr que rompan el orden o el posterior indexado
 arrange(anio, mes) %>% # ordena cronológicamente (fundamental para encadenar)
 mutate(
 # Identificar el punto base
-    es_base = (anio == 2021 & mes == 1), # Marca la observacion que actua como base
+    es_base = (anio == anio_base & mes == mes_base), # Marca la observacion que actua como base
 # Inicializar valores encadenados
     valor_encadenado = NA_real_ # Crea una nueva columna inicialmente con valores NA, que luego cambiaran
   )
@@ -311,6 +308,22 @@ ipc_oficial_largo <- ipc_oficial %>%
   ) %>%
   select(-`...1`) %>% # Eliminar columna de nombre
 filter(anio > 2018 & anio < 2026) # Filtrar años
+
+# Pasar a base que me interesa
+ipc_base <- ipc_oficial_largo %>%
+  filter(anio == anio_base, mes == mes_base) %>%
+  pull(ipc_oficial)
+
+# Creo nueva columna con base seleccionada = 100
+ipc_oficial_largo <- ipc_oficial_largo %>%
+  rename(
+    ipc_oficial_prev = ipc_oficial
+  ) %>%
+  mutate(ipc_oficial = (ipc_oficial_prev / ipc_base) * 100) %>%
+  select(
+    - ipc_oficial_prev
+  )
+
 
 # Junto indices y limpio tabla
 ipc_inquilinos <- indice_final %>%

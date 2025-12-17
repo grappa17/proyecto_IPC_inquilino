@@ -15,10 +15,7 @@ library(ggplot2)
 library(data.table)
 library(writexl)
 
-# AÑOS A OBTENER (SOLO TOCAR ESTO)
-anios <- 2019:2025
-
-
+# AÑOS A OBTENER
 anios_ponderaciones <- (min(anios) - 2):(max(anios) - 1) # Para los años que quiero obtener, necesito años previos de ponderaciones
 anios_ponderaciones_IPC <- (min(anios) - 1):(max(anios)) # Para los años que quiero obtener, necesito años previos de ponderaciones
 
@@ -34,10 +31,6 @@ ruta_graficos <- file.path(base_dir, "GRAFICOS")
 if (!dir.exists(ruta_graficos)) {
   dir.create(ruta_graficos, recursive = TRUE)
 }
-
-# Defino colores de gráficos:
-c_inquilinos <- "#E31A1C"
-c_oficial <- "#1F78B4"
 
 
 ####### Graficos estatales #######

@@ -17,9 +17,7 @@ library(ggplot2)
 library(data.table)
 library(writexl)
 
-# AÑOS A OBTENER (SOLO TOCAR ESTO)
-anios <- 2019:2025
-
+# AÑOS A OBTENER
 
 anios_ponderaciones <- (min(anios) - 2):(max(anios) - 1) # Para los años que quiero obtener, necesito años previos de ponderaciones
 anios_ponderaciones_IPC <- (min(anios) - 1):(max(anios)) # Para los años que quiero obtener, necesito años previos de ponderaciones
@@ -214,7 +212,7 @@ indice_encadenado_ccaa <- indice_general_ccaa %>%
   group_by(CCAA) %>% # agrupa por CCAA para procesar cada una independientemente
   mutate(
     # Identificar el punto base para cada CCAA
-    es_base = (anio == 2021 & mes == 1),
+    es_base = (anio == anio_base & mes == mes_base),
     # Inicializar valores encadenados
     valor_encadenado = NA_real_,
     # Crear índice de fila dentro de cada CCAA
@@ -416,6 +414,18 @@ ipc_oficial_largo_ccaa <- ipc_oficial_ccaa %>%
   ) %>%
   filter(anio %in% anios)
 
+# Cambio de base
+# Obtengo el valor de IPC del periodo base para cada CCAA
+ipc_base_ccaa <- ipc_oficial_largo_ccaa %>%
+  filter(anio == anio_base, mes == mes_base) %>%
+  select(CCAA, ipc_oficial) %>%
+  rename(ipc_base = ipc_oficial)
+
+# Creo nueva columna con base seleccionada = 100 y elimino la original
+ipc_oficial_largo_ccaa <- ipc_oficial_largo_ccaa %>%
+  left_join(ipc_base_ccaa, by = "CCAA") %>%
+  mutate(ipc_oficial = (ipc_oficial / ipc_base) * 100) %>%
+  select(-ipc_base)
 
 # Unir y limpiar
 ipc_inquilinos_ccaa <- indice_encadenado_ccaa %>%
