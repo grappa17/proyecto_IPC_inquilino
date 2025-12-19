@@ -51,18 +51,26 @@ for (i in years) {
   dt2 <- fread(file.path(ruta_datos_epf_actualizados, paste0("/hogar_join_", i, ".tsv.gz")))
   
   # CALCULO PONDERACIONES
-  # calculamos el gasto en alquiler por hogar
+  # calculamos el gasto en alquiler por hogar. Para los ficheros de gastos, se selecciona el gasto en alquiler de vivienda principal
+  # (OJO, que aqui habria que ver si tiene sentido excluir garage, trastero, etc.) Luego no se por que se coge GASTO y no GASTOMON, que es el monetario.
+  # En todo caso, lo que se hace es coger el gasto en ese componente, y luego la variable "numero" permite identificar al hogar correspondiente con ese gasto
   rent_agg <- dt1[grep("^0411", CODIGO), .(GALQ = sum(GASTO, na.rm = TRUE)), by = "NUMERO"]
   
+  # Contamos NAs en rent_agg
+  num_na_galq <- sum(is.na(rent_agg$GALQ))
+  print(sprintf("Year %d: NAs en GALQ de rent_agg = %d", i, num_na_galq))
+  
   # We use dt2 as the base because it contains the correct annual GASTMON (1 row per family)
-  dt <- merge(dt2, rent_agg, by = "NUMERO", all.x = TRUE)[is.na(GALQ), GALQ := 0]
+  # Aqui se unen los dos tipos de ficheros, el de renta_agg hecho a parti del fichero de gasto, con el de hogar, por la variable "NUMERO" que identifica al hogar.
+  dt <- merge(dt2, rent_agg, by = "NUMERO", all.x = TRUE)
+  #[is.na(GALQ), GALQ := 0]
   
   # definimos la encuesta y acotamos la muestra para crear objeto survey con pesos
   sv_dt <- svydesign(id = ~1, weights = ~FACTOR, data =  subset(dt, ANOENC == i))
   
   # para el total simplemente syytotal
-  alquiler <- svytotal(~GALQ, subset(sv_dt, REGTEN == 3))
-  gasto <- svytotal(~GASTMON, subset(sv_dt, REGTEN == 3))
+  alquiler <- svytotal(~GALQ, subset(sv_dt, REGTEN == 3), na.rm = TRUE)
+  gasto <- svytotal(~GASTMON, subset(sv_dt, REGTEN == 3), na.rm = TRUE)
   
   # para poder cruzar por CCAA como segunda categoria se usa el objeto svyby
   alquiler_ccaa <- svyby(~GALQ, ~ CCAA, subset(sv_dt, REGTEN == 3), svytotal, na.rm = TRUE)
