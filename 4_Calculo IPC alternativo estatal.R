@@ -290,7 +290,7 @@ print(resumen_full)
 
 ########### Guardar datos ####
 
-# Obtener el IPC orginal para comparar (si me lo curro más creo que tendría que desencadenarlo y ponerlo exactamente en la misma base)
+# Obtener el IPC orginal para comparar
 # Filtrar la fila "Índice general"
 ipc_oficial <- ipc_original %>%
   filter(`...1` == "Índice general")
@@ -339,3 +339,8 @@ saveRDS(ipc_inquilinos,
         file = file.path(ruta_resultados, "ipc_inquilinos_estatal.rds"))
 write_xlsx(ipc_inquilinos,
            path = file.path(ruta_resultados, "ipc_inquilinos_estatal.xlsx"))
+
+
+##### CALCULO MEDIAS ANUALES #####
+# Tengo que tener datos de 2018 para ambos indices
+
