@@ -124,8 +124,7 @@ df_vivienda_idealista_ccaa_sin_desencadenar <- read_xlsx(
 
 # Selecciono años
 df_vivienda_idealista_ccaa_sin_desencadenar <- df_vivienda_idealista_ccaa_sin_desencadenar %>%
-  filter(anio %in% anios_ponderaciones_IPC) %>%
-  filter(!(anio == 2025 & mes == 8))  # Elimino el mes de agosto
+  filter(anio %in% anios_ponderaciones_IPC)
 
 df_vivienda_idealista_ccaa_desencadenado <- df_vivienda_idealista_ccaa_sin_desencadenar %>%
   # Asegurar que los datos están ordenados por año y mes
