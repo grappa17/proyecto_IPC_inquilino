@@ -141,6 +141,13 @@ print(ipc_comprobacion)
 saveRDS(ponderaciones_largo,
         file = file.path(ruta_ponderaciones_definitivas, "ponderaciones_estatales_definitivas.rds"))
 
+ponderaciones_largo_2025 <- ponderaciones_largo %>%
+  filter(
+    anio == 2025
+  )
+write_xlsx(ponderaciones_largo_2025,
+           path = file.path(ruta_ponderaciones_definitivas, "ponderaciones_estatales_2025.xlsx"))
+
 
 
 ###### CCAA ######

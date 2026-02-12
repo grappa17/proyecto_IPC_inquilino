@@ -447,3 +447,38 @@ saveRDS(ipc_inquilinos_ccaa,
         file = file.path(ruta_resultados, "ipc_inquilinos_ccaa.rds"))
 write_xlsx(ipc_inquilinos_ccaa,
            path = file.path(ruta_resultados, "ipc_inquilinos_ccaa.xlsx"))
+
+
+##### Calculo variación media anual de 2025 #####
+
+# Ordenar datos por CCAA y fecha para asegurar correcta comparacion
+ipc_inquilinos_ccaa <- ipc_inquilinos_ccaa %>%
+  arrange(CCAA, fecha)
+
+# Calcular variaciones interanuales por CCAA
+ipc_inquilinos_ccaa_medias <- ipc_inquilinos_ccaa %>%
+  group_by(CCAA) %>%
+  mutate(
+    var_ipc_inquilinos = (ipc_inquilinos / lag(ipc_inquilinos, 12) - 1) * 100,
+    var_ipc_oficial = (ipc_oficial / lag(ipc_oficial, 12) - 1) * 100
+  ) %>%
+  ungroup()
+
+# Filtrar datos de 2025
+ipc_2025 <- ipc_inquilinos_ccaa_medias %>%
+  filter(anio == 2025)
+
+# Calcular media anual de variaciones por CCAA
+medias_2025_ccaa <- ipc_2025 %>%
+  group_by(CCAA) %>%
+  summarise(
+    media_var_inquilinos = mean(var_ipc_inquilinos, na.rm = TRUE),
+    media_var_oficial = mean(var_ipc_oficial, na.rm = TRUE)
+  )
+
+print(medias_2025_ccaa)
+
+# Guardar
+write_xlsx(medias_2025_ccaa,
+           path = file.path(ruta_resultados, "ipc_inquilinos_ccaa_medias_2025.xlsx"))
+

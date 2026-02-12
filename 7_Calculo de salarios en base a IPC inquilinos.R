@@ -81,6 +81,9 @@ deflactores_anual_estatal <- deflactores_estatal %>%
     .groups = 'drop'
   )
 
+# Guardo para poder calcular a mano salarios en base a datos de estadisticas CCT
+write_xlsx(deflactores_anual_estatal,
+           path = file.path(ruta_resultados, "ipc_anual_estatal.xlsx"))
 
 # Convierto anio a numerico en los data frames
 salarios_ccaa <- salarios_ccaa %>%
