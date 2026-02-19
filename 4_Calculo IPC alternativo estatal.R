@@ -151,7 +151,7 @@ indice_general <- ipc_reponderado %>%
 ###################### Encadenamiento del nuevo indice #####
 
 # Por ultimo, se vuelve a encadenar el índice general, para tenerlo en el mismo formato que el oficial. 
-# En este caso utilizamos una base enero 2021 = 100. 
+# En este caso utilizamos una base enero 2019 = 100. 
 
 # Para volver a encadenar, el procedimiento es el siguiente: se establece el mes y año base. Para los meses posteriores, se distingue
 # entre si es enero y si no es. Si es, se calcula el coficiente de variacion dividiendo entre 100 (porque el mes anterior actua como base), y si 
