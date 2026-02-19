@@ -197,7 +197,7 @@ indice_general_ccaa <- ipc_reponderado_ccaa %>%
   group_by(anio, mes, CCAA) %>% 
   summarise(
     Componente = "Índice general",
-    valor = sum(valor_ponderado, na.rm = TRUE) / 1000) # Por qué salen valores tan raros en 2025?????
+    valor = sum(valor_ponderado, na.rm = TRUE) / 1000)
 
 
 
@@ -394,7 +394,7 @@ if(resumen_full$max_diff_abs > 0.001) {
 }
 
 ###### Guardado de datos ######
-# Obtener el IPC orginal para comparar (si me lo curro más creo que tendría que desencadenarlo y ponerlo exactamente en la misma base)
+# Obtener el IPC orginal para comparar
 # Filtrar la fila "Índice general"
 ipc_oficial_ccaa <- read_xlsx(
   path = file.path(ruta_ipc_original, "IPC_GENERAL_CCAA.xlsx"))

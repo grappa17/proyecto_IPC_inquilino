@@ -340,7 +340,3 @@ saveRDS(ipc_inquilinos,
 write_xlsx(ipc_inquilinos,
            path = file.path(ruta_resultados, "ipc_inquilinos_estatal.xlsx"))
 
-
-##### CALCULO MEDIAS ANUALES #####
-# Tengo que tener datos de 2018 para ambos indices
-
