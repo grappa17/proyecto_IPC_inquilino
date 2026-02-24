@@ -1,69 +1,37 @@
+# Proyecto IPC Inquilino: Midiendo la inflación real de los hogares de alquiler
 
-IMPORTANTE: Es necesario descargar a parte los microdatos de la EPF y colocarlos en la carpeta correspondiente, pues pesan demasiado para poder subirlos a github.
+Este repositorio contiene el código y las bases de datos necesarias para reproducir el cálculo del "IPC Inquilino". Este índice alternativo mide la evolución real de los precios y la pérdida de poder adquisitivo de los hogares que viven de alquiler a precio de mercado. Este grupo representa el 17% de los hogares en el Estado español, sumando alrededor de 3,3 millones de hogares en los que viven 8,4 millones de personas. 
 
-# GUÍA DEL SCRIPT PARA CONSTRUIR UN IPC DE INQUILINOS
+El proyecto y la investigación original han sido desarrollados por el Gabinete Socioeconómico Confederal de CGT (Autores: Lorién Cirera Sancho y Miguel García-Duch).
 
-## 0. Materiales y preparaciones previas
+## Metodología y Fuentes de Datos
 
-Subidos a github están todos los archivos necesarios para correr el script, menos los microdatos de la EPF, que pesan demasiado, y están subidos a drive en el siguiente link: https://drive.google.com/drive/folders/1BDpfJDn8N_Kk75EYfv6zBh-P8h1EUAs2?usp=drive_link. Para que funcione bien el script hay que meterlos en la carpeta `DATOS/EPF/` dentro de la carpeta del proyecto.
+El índice se construye replicando la metodología del IPC oficial (Laspeyres encadenado), pero solucionando la infrarrepresentación del gasto en alquiler en el índice general del INE. Para ello, utiliza:
+1. **Ponderaciones del Alquiler (EPF):** Se extraen de los microdatos de la Encuesta de Presupuestos Familiares del INE. A diferencia del IPC oficial, las ponderaciones se calculan filtrando estrictamente los hogares en régimen de alquiler a precio de mercado e indexando el peso del alquiler sobre el Gasto Monetario total del hogar.
+2. **Evolución de Precios (Idealista):** Ante la subestimación de precios por parte del índice de alquileres del IPC oficial (que sólo recoge una subida acumulada del 5,2% entre 2019 y 2023), se utilizan los precios mensuales del portal Idealista para el componente de vivienda.
+3. **Resto de la Cesta (INE):** Se utilizan los microdatos mensuales del IPC oficial para el resto de los subgrupos de consumo.
 
-Hay 8 scripts, numerados por orden excepto "makefile". "makefile" corre el resto de scripts.
+## Estructura de Datos
 
-Los scripts empiezan definiendo los años que se quieren obtener, en un vector a partir del cual se derivan otros. También se muestra el directorio con las rutas que utiliza el script.
+Todos los datos necesarios para reproducir el proyecto ya se encuentran incluidos en este repositorio. Los microdatos de la EPF (históricos y actualizados) se localizan en la carpeta `EPF_NUEVO/`. Han sido optimizados y comprimidos en formato `.gz` para sortear los límites de tamaño de GitHub, permitiendo a su vez una lectura ultra rápida con librerías como `data.table`. No es necesaria ninguna descarga externa.
 
-En general, el proceso del proyecto es el siguiente:
+## Instalación de Dependencias y Flujo de Trabajo
 
-- Calcular, a partir de los microdatos de la EPF, el peso del gasto en alquiler de vivienda sobre el total de gasto para cada año, a nivel estatal y por CCAA.
-- Calcular nuevas ponderaciones del conjunto de subgrupos que conforman el IPC general a partir del nuevo peso del alquiler, a nivel estatal y por CCAA.
-- Cargar las nuevas ponderaciones, y unir varios subgrupos que en la forma más actualizada de proporcionar los datos del IPC ya no aparecen, para que las ponderaciones correspondan con los datos de precios que proporciona el INE.
-- A partir de esas ponderaciones, recalcular el IPC para inquilinos a nivel estatal.
-- A partir de esas ponderaciones, recalcular el IPC para inquilinos a nivel CCAA.
-- Hacer gráficos.
-- Calcular salarios con nuevos IPC.
+Las dependencias y librerías necesarias para que el código funcione correctamente están contenidas en el archivo **`requirements.R`**. **Es imprescindible ejecutar este script por adelantado** para preparar tu entorno de R.
 
-## 0. Correr el resto de scripts.
+Una vez instaladas las dependencias, el proyecto está estructurado en una tubería (*pipeline*) de scripts. Puedes ejecutar el archivo `makefile.R` para correr todo el proceso secuencialmente, o bien ejecutar los scripts individuales en el siguiente orden:
 
-## 1. Calcular ponderaciones del alquiler
+* **`0_requirements.R`** (o `requirements.R`): Instala y carga paquetes fundamentales como `data.table` (para procesar datos masivos rápidamente) y `survey` (para manejar el diseño muestral complejo de la EPF). **Ejecutar primero.**
+* **`1_Calculo ponderaciones alquiler a partir de EPF.R`**: Lee los microarchivos comprimidos directamente desde la carpeta `EPF_NUEVO/` y calcula el peso real del alquiler respecto al gasto monetario para los inquilinos de libre mercado a nivel estatal y por CCAA.
+* **`2_Calculo ponderaciones subgrupos a partir de nuevo peso alquiler.R`**: Recalcula el peso proporcional de los demás componentes de la cesta del IPC para que el total siga sumando 1000, integrando la nueva ponderación mayoritaria del alquiler.
+* **`3_Carga de ponderaciones y nuevas agrupaciones.R`**: Unifica los datos y agrupa los subgrupos en categorías coherentes con los datos mensuales de precios publicados por el INE en la actualidad.
+* **`4_Calculo IPC alternativo estatal.R`**: Desencadena el IPC base oficial, sustituye el componente 041 por los datos de Idealista, aplica las nuevas ponderaciones calculadas y vuelve a encadenar el índice final a nivel estatal.
+* **`5_Calculo IPC inquilinos ccaa.R`**: Replica el proceso del paso 4 desagregado para cada Comunidad Autónoma.
+* **`6_Graficos.R`**: Genera gráficos comparativos visuales entre el crecimiento del IPC General y el IPC Inquilino.
+* **`7_Calculo de salarios en base a IPC inquilinos.R`**: Deflacta los salarios medios por hora utilizando el nuevo IPC Inquilino para evidenciar la pérdida real de poder adquisitivo, comparándola con los resultados que arroja el IPC oficial.
 
-Porcentaje del gasto dedicado al pago del alquiler por parte de la población inquilina.
+## Licencia y Contacto
 
-Esto se realiza a partir de los microdatos de la Encuesta de Presupuestos Familiares (EPF). Calculo el peso del alquiler respecto al total del consumo sin alquiler imputado de cada hogar, a nivel estatal y por CCAA, con valores para cada año. Es importante que el año de la ponderación luego se "retrasa", pues el IPC utiliza las ponderaciones del año anterior. (En realidad utiliza las del año N-2, pero actualizándolas con información que no hace pública, por lo que la mejor aproximación es utilizar el año N-1, aunque eso implica que durante unos meses hasta que se publica la EPF del año N-1 no se puede actualizar el índice en tiempo real.
+**Licencia:** Este proyecto es de código abierto y se distribuye bajo la licencia **GNU General Public License v3.0 (GPL-3.0) Share Alike**. Eres libre de usar, modificar y distribuir este software, siempre y cuando cualquier obra derivada también se distribuya bajo esta misma licencia y mantenga su carácter abierto.
 
-## 2. Calcular conjunto de ponderaciones a partir de las nuevas ponderaciones del alquiler
-
-Después de haber obtenido las ponderaciones del alquiler de vivienda, es necesario reponderar el resto de componentes, para que el total de ponderaciones siga siendo 1000. Idealmente podría utilizar todas las ponderaciones de la EPF para inquilinos para que fuese más fino, pero no lo he hecho así y es bastante más trabajo. De modo que a partir de los nuevos pesos del gasto en alquiler, se recalculan manteniendo su peso proporcional el resto de componentes. Para cada año se exporta un nuevo archivo de ponderaciones.
-
-## 3. Cargar los datos, unirlos y generar nuevas agrupaciones de algunas ponderaciones
-
-Cargamos los archivos uniéndolos en un único dataframe. En el dataframe resultante, hay que eliminar algún componente sumando su valor a otros, para uniformarlos y que coincidan perfectamente con los del IPC.
-
-Este proceso se repite con los datos de CCAAs.
-
-## 4. Cálculo del nuevo IPC con las nuevas ponderaciones para el IPC estatal
-
-Cargamos los datos del IPC, previamente preparados en un excel, y lo primero que hay que hacer es desencadenarlos, dado que el INE los proporciona siguiendo la metodología de Laspeyres encadenado. Una vez desencadenados, es posible trabajar con los valores de los componentes.
-
-Así, lo siguiente que hay que hacer es eliminar los valores antiguos del alquiler en los datos originales y unir mis nuevos valores de alquiler, procedentes del portal Idealista. La cuestión de la fuente de datos es un asunto metodológico complicado, porque idealista tiene a sobreestimar los incrementos de precios al reflejar solo los precios de las viviendas que están en el mercado. Pero la alternativa era utilizar el propio indicador de precios del IPC, que, comparado con las fuentes más fiables (como el IPVA, que tiene el problema de ser anual) tiene el problema contrario, infraestima los incrementos. Los datos de idealista los he "desencadenado" manualmente en el propio Excel, poniendo cada año en el mismo formato que el IPC, es decir en base 100 con referencia a diciembre del año anterior.
-
-Una vez unido el componente del alquiler, hay que reponderar el índice desencadenado, recalculando el índice general a partir de sus componentes.
-
-Por último, se vuelve a encadenar el índice general, para tenerlo en el mismo formato que el oficial. En este caso utilizamos una base enero 2021 = 100, aunque no tengo claro que mes utiliza como base o como trabaja eso el índice oficial, más alla de que su año base es también el 2021.
-
-Las comprobaciones finales permiten comprobar la coherencia entre el índice encadenado y el índice sin encadenar.
-
-## 5. Cálculo del nuevo IPC con las nuevas ponderaciones para el IPC por CCAA
-
-Se repite el mismo proceso pero un poco más complejo, con los datos de todas las CCAAs. Aquí hay una diferencia importante, y es que los datos de alquiler de idealista no los he "desencadenado" manualmente antes de usarlos, sino que los he descargado y ordenado tal cual aparecen en la web, y en el propio script los coloco en base 100 con referencia a diciembre anterior antes de mezclarlos con el resto de datos del IPC.
-
-## 6. Graficar
-
-Por último, graficamos los resultados y los guardamos en la carpeta de graficos nuestro proyecto, comparando el nuevo índice de inquilinos con el índice general del INE.
-
-## 7. Comparar salarios
-
-Se comparan salarios deflactados con el IPC oficial con salarios deflactados con el IPC de inquilinos para cada CCAA. El grafico se guarda en la carperta de gráficos.
-
-=======
-=======
-
-IMPORTANTE: Como indica en el documento de instrucciones, es necesario descargar a parte los microdatos de la EPF y colocarlos en la carpeta correspondiente, pues pesan demasiado para poder subirlos a github.
+Para cualquier duda metodológica o consulta sobre la investigación, puedes escribir a: econlab@econlab.info.
