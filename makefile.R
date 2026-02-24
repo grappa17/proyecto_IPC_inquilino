@@ -35,8 +35,7 @@ scripts <- c(
   "3_Carga de ponderaciones y nuevas agrupaciones.R",
   "4_Calculo IPC alternativo estatal.R",
   "5_Calculo IPC inquilinos ccaa.R",
-  "6_Graficos.R",
-  "7_Calculo de salarios en base a IPC inquilinos.R"
+  "6_Graficos.R"
 )
 
 # Ejecutar todos los scripts

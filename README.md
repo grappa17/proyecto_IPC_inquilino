@@ -28,7 +28,6 @@ Una vez instaladas las dependencias, el proyecto está estructurado en una tuber
 * **`4_Calculo IPC alternativo estatal.R`**: Desencadena el IPC base oficial, sustituye el componente 041 por los datos de Idealista, aplica las nuevas ponderaciones calculadas y vuelve a encadenar el índice final a nivel estatal.
 * **`5_Calculo IPC inquilinos ccaa.R`**: Replica el proceso del paso 4 desagregado para cada Comunidad Autónoma.
 * **`6_Graficos.R`**: Genera gráficos comparativos visuales entre el crecimiento del IPC General y el IPC Inquilino.
-* **`7_Calculo de salarios en base a IPC inquilinos.R`**: Deflacta los salarios medios por hora utilizando el nuevo IPC Inquilino para evidenciar la pérdida real de poder adquisitivo, comparándola con los resultados que arroja el IPC oficial.
 
 ## Licencia y Contacto
 
