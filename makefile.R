@@ -19,7 +19,7 @@ mes_base <- 1
 anios <- 2019:2025
 
 # Colores de graficos:
-c_inquilinos <- "#E31A1C"
+c_inquilinos <- "#FF0031"
 c_oficial <- "#1F78B4"
 
 
