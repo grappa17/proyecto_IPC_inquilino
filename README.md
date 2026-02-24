@@ -15,11 +15,14 @@ El índice se construye replicando la metodología del IPC oficial (Laspeyres en
 
 Todos los datos necesarios para reproducir el proyecto ya se encuentran incluidos en este repositorio. Los microdatos de la EPF (históricos y actualizados) se localizan en la carpeta `EPF_NUEVO/`. Han sido optimizados y comprimidos en formato `.gz` para sortear los límites de tamaño de GitHub, permitiendo a su vez una lectura ultra rápida con librerías como `data.table`. No es necesaria ninguna descarga externa.
 
-## Flujo de Trabajo e Instrucciones de Ejecución
+## Instalación de Dependencias y Flujo de Trabajo
 
-El proyecto está estructurado en una tubería (*pipeline*) de scripts de R. Puedes ejecutar el archivo `makefile.R` para correr todo el proceso secuencialmente, o bien ejecutar los scripts individuales en el siguiente orden:
+Las dependencias y librerías necesarias para que el código funcione correctamente están contenidas en el archivo **`requirements.R`**. **Es imprescindible ejecutar este script por adelantado** para preparar tu entorno de R.
 
-* **`1_Calculo ponderaciones alquiler a partir de EPF.R`**: Lee los microarchivos comprimidos directamente desde la carpeta `EPF_NUEVO/` y calcula el peso real del alquiler respecto al gasto monetario para los inquilinos de libre mercado a nivel estatal y por CCAA. Se emplea la librería `survey` para respetar el diseño muestral complejo de la encuesta oficial y obtener estimaciones precisas.
+Una vez instaladas las dependencias, el proyecto está estructurado en una tubería (*pipeline*) de scripts. Puedes ejecutar el archivo `makefile.R` para correr todo el proceso secuencialmente, o bien ejecutar los scripts individuales en el siguiente orden:
+
+* **`0_requirements.R`** (o `requirements.R`): Instala y carga paquetes fundamentales como `data.table` (para procesar datos masivos rápidamente) y `survey` (para manejar el diseño muestral complejo de la EPF). **Ejecutar primero.**
+* **`1_Calculo ponderaciones alquiler a partir de EPF.R`**: Lee los microarchivos comprimidos directamente desde la carpeta `EPF_NUEVO/` y calcula el peso real del alquiler respecto al gasto monetario para los inquilinos de libre mercado a nivel estatal y por CCAA.
 * **`2_Calculo ponderaciones subgrupos a partir de nuevo peso alquiler.R`**: Recalcula el peso proporcional de los demás componentes de la cesta del IPC para que el total siga sumando 1000, integrando la nueva ponderación mayoritaria del alquiler.
 * **`3_Carga de ponderaciones y nuevas agrupaciones.R`**: Unifica los datos y agrupa los subgrupos en categorías coherentes con los datos mensuales de precios publicados por el INE en la actualidad.
 * **`4_Calculo IPC alternativo estatal.R`**: Desencadena el IPC base oficial, sustituye el componente 041 por los datos de Idealista, aplica las nuevas ponderaciones calculadas y vuelve a encadenar el índice final a nivel estatal.
