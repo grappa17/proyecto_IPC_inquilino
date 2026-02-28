@@ -52,7 +52,7 @@ for (i in years) {
   
   # CALCULO PONDERACIONES
   # calculamos el gasto en alquiler por hogar. Para los ficheros de gastos, se selecciona el gasto en alquiler de vivienda principal
-  # (OJO, que aqui habria que ver si tiene sentido excluir garage, trastero, etc.) Luego no se por que se coge GASTO y no GASTOMON, que es el monetario.
+  # (OJO, que aqui habria que ver si tiene sentido excluir garage, trastero, etc.)
   # En todo caso, lo que se hace es coger el gasto en ese componente, y luego la variable "numero" permite identificar al hogar correspondiente con ese gasto
   rent_agg <- dt1[grep("^0411", CODIGO), .(GALQ = sum(GASTO, na.rm = TRUE)), by = "NUMERO"]
   
