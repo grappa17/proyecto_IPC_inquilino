@@ -31,14 +31,15 @@ if (!dir.exists(ruta_nuevos_pesos_alquiler)) {
 
 # CARGA MICRODATOS DE LA ENCUESTA DE PRESUPUESTOS FAMILIARES Y CALCULO PONDERACION
 # La EPF es la base para construir las ponderaciones de los grupos del IPC. Para las ponderaciones del año N,
-# el INE utiliza los datos de la EPF del año N-2, pero actualizados con informacion del año N-1. Como yo no dispongo de esa 
-# informacion, utilizo directamente los microdatos del año N-1.
+# el INE se apoya en los datos de la EPF del año N-2, pero actualizados con informacion del año N-1. Como nosotros no disponemos de esa
+# informacion, utilizamos directamente los microdatos del año N-1.
 
 # La ponderacion se calcula como la proporcion del gasto en alquiler (GALQ) sobre el total del gasto monetario de los hogares (GASTMON).
 
 # Utilizamos el gasto monetario y no el gasto total, porque el IPC se centra en el gasto en consumo de los hogares y sus miembros, 
 # entendido este como flujo monetario orientado al pago de bienes y servicios. Como indican en la metodologia (2016, p.7), excluyen
-# los bienes y servicios en especie.
+# los bienes y servicios en especie. Aunque para construir GALQ se utilice un gasto que en teoria no es solo monetario (GASTO),
+# En la práctica para ese item no hay diferencia, es equivalente y facilita el calculo.
 
 # Por ultimo, calculamos la ponderacion como cociente del gasto agregado de todos los hogares, y no como media del cociente de cada hogar, siguiendo
 # tambien la metodología del INE para la elaboracion del IPC.
@@ -51,8 +52,7 @@ for (i in years) {
   dt2 <- fread(file.path(ruta_datos_epf_actualizados, paste0("/hogar_join_", i, ".tsv.gz")))
   
   # CALCULO PONDERACIONES
-  # calculamos el gasto en alquiler por hogar. Para los ficheros de gastos, se selecciona el gasto en alquiler de vivienda principal
-  # (OJO, que aqui habria que ver si tiene sentido excluir garage, trastero, etc.)
+  # Calculamos el gasto en alquiler por hogar. Para los ficheros de gastos, se selecciona el gasto en alquiler de vivienda principal.
   # En todo caso, lo que se hace es coger el gasto en ese componente, y luego la variable "numero" permite identificar al hogar correspondiente con ese gasto
   rent_agg <- dt1[grep("^0411", CODIGO), .(GALQ = sum(GASTO, na.rm = TRUE)), by = "NUMERO"]
   
@@ -68,7 +68,7 @@ for (i in years) {
   # definimos la encuesta y acotamos la muestra para crear objeto survey con pesos
   sv_dt <- svydesign(id = ~1, weights = ~FACTOR, data =  subset(dt, ANOENC == i))
   
-  # para el total simplemente syytotal
+  # para el total simplemente syytotal. Filtramos hogares con alquiler a precio de mercado (REGTEN == 3)
   alquiler <- svytotal(~GALQ, subset(sv_dt, REGTEN == 3), na.rm = TRUE)
   gasto <- svytotal(~GASTMON, subset(sv_dt, REGTEN == 3), na.rm = TRUE)
   
