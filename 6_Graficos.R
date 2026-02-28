@@ -14,7 +14,6 @@ library(stringr)
 library(ggplot2)
 library(data.table)
 library(writexl)
-library(showtext)
 
 # AÑOS A OBTENER
 anios_ponderaciones <- (min(anios) - 2):(max(anios) - 1) # Para los años que quiero obtener, necesito años previos de ponderaciones
@@ -32,11 +31,6 @@ ruta_graficos <- file.path(base_dir, "GRAFICOS")
 if (!dir.exists(ruta_graficos)) {
   dir.create(ruta_graficos, recursive = TRUE)
 }
-
-# Fuente 
-font_add("Gotham", 
-         regular = "C:/Users/lorie/Desktop/TRABAJO/CGT/Recursos/Recursos/CGT/Gotham Font Family/Gotham-font-family/Gotham/Gotham-Book.otf")
-showtext_auto()  # Activar showtext globalmente
 
 
 ####### Graficos estatales #######
@@ -61,38 +55,31 @@ ipc_plot <- ipc_inquilinos %>%
     fecha = as.Date(paste(anio, mes, "01", sep = "-"))
   )
 
-# 2 Grafico
+# 2 Gráfico
 grafico_1 <- ggplot(ipc_plot, aes(x = fecha, y = valor, color = tipo)) +
-  geom_line(size = 1.5) +
+  geom_line(size = 1) +
   scale_color_manual(values = c(c_inquilinos, c_oficial)) +
   scale_x_date(
-    date_breaks = "1 year",
-    date_labels = "%Y",
-    expand = expansion(mult = c(0, 0.02))
+    date_breaks = "1 year",   # marcas cada año
+    date_labels = "%Y",       # etiquetas como 2021, 2022, ...
+    expand = expansion(mult = c(0, 0.02)) # evita márgenes extra
   ) +
   scale_y_continuous(
-    breaks = seq(80, 130, 5)
+    breaks = seq(80, 130, 5) # aquí ajusta el rango según tus datos
   ) +
   labs(
+    title = "Comparación IPC Inquilinos vs IPC Oficial",
     x = "Fecha",
-    y = "Indice de Precios (Base 2021)",
+    y = "Índice de Precios (Base 2021)",
     color = "Serie"
   ) +
   theme_minimal() +
   theme(
-    panel.grid.major.x = element_blank(),
-    panel.grid.minor.x = element_blank(),
-    text = element_text(family = "Gotham", size = 12),
-    axis.text.x = element_text(angle = 45, hjust = 1, family = "Gotham", size = 12),
-    axis.text.y = element_text(family = "Gotham", size = 12),
-    axis.title = element_text(family = "Gotham", size = 10),
-    legend.position = "bottom",
-    legend.title = element_text(size = 12, hjust = 0.5, family = "Gotham"),
-    legend.text = element_text(size = 12, family = "Gotham")
-  )
+    plot.title = element_text(face = "bold", size = 14, hjust = 0.5),
+    legend.position = "bottom"
+  ) +
+  labs(caption = "Fuente: Elaboración propia con datos del IPC, Idealista (precios del alquiler) \ny la Encuesta de Condiciones de Vida (ponderaciones del alquiler). Autor: Gabinete Socioeconómico CGT (@CGT_economia).")
 
-print(grafico_1)
-showtext_opts(dpi = 300)
 ggsave(
   filename = file.path(ruta_graficos, "grafico_IPC_inquilinos.jpeg"),
   plot = grafico_1,
@@ -125,7 +112,7 @@ ipc_plot_ccaa <- ipc_inquilinos_ccaa %>%
 
 # Crear el gráfico con facetas por CCAA
 grafico_ipc_ccaa <- ggplot(ipc_plot_ccaa, aes(x = fecha, y = valor, color = tipo)) +
-  geom_line(linewidth = 1.2) +
+  geom_line(linewidth = 0.9, alpha = 0.8) +
   facet_wrap(~CCAA, scales = "fixed", ncol = 3) +
   
   # Colores diferenciados
@@ -148,26 +135,27 @@ grafico_ipc_ccaa <- ggplot(ipc_plot_ccaa, aes(x = fecha, y = valor, color = tipo
   # Tema y estética
   theme_minimal() +
   theme(
+    # Títulos y etiquetas
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5, margin = margin(b = 20)),
+    plot.subtitle = element_text(size = 12, hjust = 0.5, color = "gray40", margin = margin(b = 20)),
     
     # Facetas
-    strip.text = element_text(family = "Gotham", size = 10, face = "bold", margin = margin(5, 0, 5, 0)),
+    strip.text = element_text(size = 10, face = "bold", margin = margin(5, 0, 5, 0)),
     strip.background = element_rect(fill = "gray95", color = NA),
     
     # Ejes
-    axis.title.x = element_text(family = "Gotham", size = 10, margin = margin(t = 10)),
-    axis.title.y = element_text(family = "Gotham", size = 10, margin = margin(r = 10)),
-    axis.text.x = element_text(family = "Gotham", size = 10, angle = 45, hjust = 1),
-    axis.text.y = element_text(family = "Gotham", size = 10),
+    axis.title.x = element_text(size = 11, margin = margin(t = 10)),
+    axis.title.y = element_text(size = 11, margin = margin(r = 10)),
+    axis.text.x = element_text(size = 8, angle = 45, hjust = 1),
+    axis.text.y = element_text(size = 8),
     
     # Leyenda
     legend.position = "bottom",
-    legend.title = element_text(family = "Gotham", size = 12, face = "bold"),
-    legend.text = element_text(family = "Gotham", size = 12),
+    legend.title = element_text(size = 11, face = "bold"),
+    legend.text = element_text(size = 10),
     legend.margin = margin(t = 15),
     
     # Panel y grilla
-    panel.grid.major.x = element_blank(),
-    panel.grid.minor.x = element_blank(),
     panel.grid.major = element_line(color = "gray90", linewidth = 0.3),
     panel.grid.minor = element_line(color = "gray95", linewidth = 0.2),
     panel.border = element_rect(color = "gray80", fill = NA, linewidth = 0.3),
@@ -178,15 +166,17 @@ grafico_ipc_ccaa <- ggplot(ipc_plot_ccaa, aes(x = fecha, y = valor, color = tipo
   
   # Títulos
   labs(
+    title = "Comparación IPC Oficial vs IPC Inquilinos por Comunidad Autónoma",
+    subtitle = "Evolución temporal del Índice de Precios al Consumo (Base: 2021 = 100)",
     x = "Fecha",
-    y = "Índice (Base 100)"
+    y = "Índice (Base 100)",
+    caption = "Fuente: Elaboración propia a partir de los datos del IPC, la Encuesta de Presupuestos Familiares y los precios de alquileres del portal Idealista.\nGabinete socioeconómico de CGT (@CGTsocioeconomico)"
   )
 
 # Mostrar el gráfico
 print(grafico_ipc_ccaa)
 
 # Guardar en alta resolución
-showtext_opts(dpi = 300)
 ggsave(
   file.path(ruta_graficos, "comparacion_ipc_ccaa.png"),
   plot = grafico_ipc_ccaa,
@@ -195,4 +185,3 @@ ggsave(
   dpi = 300, 
   bg = "white"
 )
-
